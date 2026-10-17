@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+SQLAlchemy
+alembic
+psycopg
+passlib
+bcrypt
+cryptography
+pydantic
+requests
+httpx
+PyYAML
+pydantic-settings

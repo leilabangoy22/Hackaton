@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyd
+.venv
+*.log
+*config.py
+API_Flood_Sensor/App/wfastcgi.log
+alembic/
