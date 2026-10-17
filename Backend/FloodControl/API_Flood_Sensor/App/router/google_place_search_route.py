@@ -2,11 +2,11 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import httpx
 from starlette.requests import Request  # Import Request for accessing query params
-from .. import config
+from ..settings import Settings
 
 from ..dto import google_place_search_dto
 
-settings = config.Settings()
+settings = Settings()
 
 # Replace with your actual API key
 API_KEY = settings.map_key
