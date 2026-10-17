@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from typing import Annotated
 from sqlmodel import Session, select
-from datetime import datetime
+from datetime import datetime,timezone
 
 from ..db import get_db
 from ..schemas import Response_Schema
@@ -43,9 +43,9 @@ def add_response(user_id : int, report_id : int,response_schema : Response_Schem
 
         get_user = db.get(User, user_id)
         response_schema.created_by = get_user.name
-        response_schema.created_at = datetime.now()
+        response_schema.created_at = datetime.now(timezone.utc)
         response_schema.updated_by = get_user.name
-        response_schema.updated_at = datetime.now()
+        response_schema.updated_at = datetime.now(timezone.utc)
         response = Response(**response_schema.model_dump(exclude={'response_id'}))
         db.add(response)
         db.commit()
@@ -62,7 +62,7 @@ def update_response(user_id : int, response_id : int,response_schema : Response_
     try:
         query_response = Response.model_validate(response_schema)
         db_response = db.get(Response, response_id)
-        db_response.updated_at = datetime.now()
+        db_response.updated_at = datetime.now(timezone.utc)
         get_rescue_personel = db.get(Rescue_Personel, response_schema.rescue_personel_id)
         if not get_rescue_personel:
             raise HTTPException(status_code=404, detail='No Rescue Personel Found')

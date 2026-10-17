@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from typing import Annotated, List
 from sqlmodel import Session, select, desc
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from ..db import get_db
 from ..schemas import Flood_Sensor_Schema
@@ -54,20 +54,20 @@ data_list : List[int] = []
 async def add_sensor_data(sensor_schema: Flood_Sensor_Schema.Flood_SensorBase, db: Session = Depends(get_db)):
     try:
         global cache_list, time_delta, data_list
-        sensor_time = datetime.now()
+        sensor_time = datetime.now(timezone.utc)
         if time_delta is None:
             time_delta = sensor_time + timedelta(minutes=1)
         if time_delta > sensor_time:
             data_list.insert(0, sensor_schema.data)
             data_payload = sensor_flood_dto.Flood_SensorBase(
                 flood_data=sensor_schema.data,
-                created_at=datetime.now()
+                created_at=datetime.now(timezone.utc)
             )
             cache_list.insert(0,data_payload)
             return sensor_flood_dto.Flood_SensorBaseList(status_code=200, datas=cache_list)
         total_data = sum(data_list)
         ave_data = total_data / len(data_list)
-        sensor_schema.created_at = datetime.now()
+        sensor_schema.created_at = datetime.now(timezone.utc)
         new_sensor = Flood_Sensor(
             data=ave_data,
             created_at=sensor_time

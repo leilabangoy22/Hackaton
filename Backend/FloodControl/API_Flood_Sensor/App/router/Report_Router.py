@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from typing import Annotated, List
 from sqlmodel import Session, select, and_
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..db import get_db
 from ..schemas import Report_Schema
@@ -118,9 +118,9 @@ def add_report(report_schema : Report_Schema.Report_SchemaBase,user_id : int,db 
             response_status="Pending",
             report_status="Pending",
             created_by=get_user.name,
-            created_at=datetime.now(),
+            created_at=datetime.now(timezone.utc),
             updated_by=get_user.name,
-            updated_at=datetime.now()
+            updated_at=datetime.now(timezone.utc)
         )
         db.add(sqldata)
         db.commit()
@@ -142,9 +142,9 @@ def add_report(report_schema : Report_Schema.Report_SchemaBase,user_id : int,db 
             response_status="Pending",
             report_status="Pending",
             created_by=get_user.name,
-            created_at=datetime.now(),
+            created_at=datetime.now(timezone.utc),
             updated_by=get_user.name,
-            updated_at=datetime.now()
+            updated_at=datetime.now(timezone.utc)
         )
         return Report_Schema.Report_SchemaBaseResponse(status_code=200, data=payload)
     except Exception as ex:
@@ -159,7 +159,7 @@ def update_report(report_id : int, report_schema : Report_Schema.Report_SchemaBa
         if not get_user:
             raise HTTPException(status_code=404, detail='User Cannot Be Found')
         db_report.updated_by = get_user.name
-        db_report.updated_at = datetime.now()
+        db_report.updated_at = datetime.now(timezone.utc)
         dump = query_report.model_dump(exclude={'report_id'}, exclude_unset=True)
         db_report.sqlmodel_update(dump)
         db.add(db_report)
@@ -194,7 +194,7 @@ def add_response_by_dispatcher(report_id: int, user_id: int, addresponse: Report
         get_report.rescue_personnel_id = fallback_serviceClass.fallback(addresponse.rescue_personnel_id, get_report.rescue_personnel_id)
         get_report.report_status = fallback_serviceClass.fallback(addresponse.report_status, get_report.report_status)
         get_report.assigned_to = fallback_serviceClass.fallback(addresponse.assigned_to, get_report.assigned_to)
-        get_report.updated_at = datetime.now()
+        get_report.updated_at = datetime.now(timezone.utc)
         get_report.updated_by = fallback_serviceClass.fallback(get_dispatcher.name, get_report.updated_by)
         get_report.response_status = fallback_serviceClass.fallback(addresponse.response_status, get_report.response_status)
 
