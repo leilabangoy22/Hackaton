@@ -3,6 +3,6 @@ __pycache__/
 *.pyd
 .venv
 *.log
-API_Flood_Sensor/App/config.py
-API_Flood_Sensor/App/wfastcgi.log
+FDR_AI_Integration/API/App/config.py
+FDR_AI_Integration/API/App/saved_elevations.py
 alembic/

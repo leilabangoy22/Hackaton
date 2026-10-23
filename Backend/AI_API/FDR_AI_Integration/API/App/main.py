@@ -2,14 +2,21 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from google import genai
-# import config # -- Local
+
+
 from .settings import Settings # -- Remote
+from .Router import ai_group_route
+setting = Settings() # -- remote
+
+
+# from Router import ai_group_route
+# from config import Setting # -- Remote
+
+
 from fastapi.middleware.cors import CORSMiddleware
 
-from Router import ai_group_route
 
-setting = Settings() # -- remote
-# setting = config.Settings() # -- local
+setting = Settings() # -- local
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
