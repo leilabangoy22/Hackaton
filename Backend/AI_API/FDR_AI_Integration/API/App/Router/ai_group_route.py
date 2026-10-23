@@ -6,7 +6,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Query
 from google import genai
 
-import config
+# import config
 from ..settings import Settings # -- Remote
 
 from DTO import ai_params_dto, risk_response_dto
