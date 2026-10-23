@@ -34,10 +34,11 @@ A multi-tier software project containing a Flutter application frontend, Backend
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This repository houses the source code for **Hackaton**, structured across three primary directories:
-* **Flutter** — Client application frontend (Mobile & Web) [31].
-* **Backend** — Backend API service handling data logic and endpoints [31].
-* **Scripts** — Automation and environment setup scripts [31].
+This Web Application hosts an AI that predicts flood risk based on geographical location and environmental data. It uses a grid-based system to identify nearby areas and assess their potential flood risk.
+
+The application integrates environmental information, including saved elevation data, current weather conditions, and nearby mapped lakes and reservoirs, to support flood risk assessment.
+
+By combining geographical data and AI-powered analysis, the system aims to provide users with information about potential flooding in their selected locations and help them make informed decisions.
 
 ---
 
