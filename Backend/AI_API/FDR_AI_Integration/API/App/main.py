@@ -3,12 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from google import genai
 # import config # -- Local
-import settings # -- Remote
+from .settings import Settings # -- Remote
 from fastapi.middleware.cors import CORSMiddleware
 
 from Router import ai_group_route
 
-setting = settings.Settings() # -- remote
+setting = Settings() # -- remote
 # setting = config.Settings() # -- local
 
 @asynccontextmanager
