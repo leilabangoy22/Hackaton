@@ -4,13 +4,13 @@ from fastapi import FastAPI, Request
 from google import genai
 
 
-# from .settings import Settings # -- Remote
-# from .Router import ai_group_route
+from .settings import Setting # -- Remote
+from .Router import ai_group_route
 # setting = Settings() # -- remote
 
 
-from Router import ai_group_route
-from config import Setting # -- Remote
+# from Router import ai_group_route
+# from config import Setting # -- Remote
 
 
 from fastapi.middleware.cors import CORSMiddleware

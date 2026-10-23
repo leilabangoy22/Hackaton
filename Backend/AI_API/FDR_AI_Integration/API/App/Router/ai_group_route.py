@@ -160,7 +160,7 @@ ENVIRONMENTAL DATA:
                 "response_schema": (
                     risk_response_dto.GeminiRiskResponse
                 ),
-            },
+            },  
         )
 
         if not response.text:
