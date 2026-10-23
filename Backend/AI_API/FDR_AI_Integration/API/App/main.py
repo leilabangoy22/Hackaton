@@ -6,7 +6,7 @@ from google import genai
 from .settings import Settings # -- Remote
 from fastapi.middleware.cors import CORSMiddleware
 
-from Router import ai_group_route
+from .Router import ai_group_route
 
 setting = Settings() # -- remote
 # setting = config.Settings() # -- local
