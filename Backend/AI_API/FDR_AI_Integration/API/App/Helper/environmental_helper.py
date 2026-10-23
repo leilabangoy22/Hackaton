@@ -4,7 +4,6 @@ import math
 import httpx
 
 
-ELEVATION_URL = "https://api.open-meteo.com/v1/elevation"
 WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
@@ -13,7 +12,7 @@ OVERPASS_HEADERS = {
     "Accept": "application/json",
 }
 
-    
+
 def calculate_distance_km(
     latitude1: float,
     longitude1: float,
@@ -49,43 +48,22 @@ def calculate_distance_km(
 async def get_environmental_factors(
     cells: list[dict],
 ) -> list[dict]:
+    """Add saved elevation, current weather, and mapped lake information."""
 
     if not cells:
         return []
 
-    async with httpx.AsyncClient(timeout=30) as client:
-
-        # ------- 1. Retrieve elevation for all grid cells.
-
-        elevation_response = await client.get(
-            ELEVATION_URL,
-            params={
-                "latitude": ",".join(
-                    str(cell["latitude"]) for cell in cells
-                ),
-                "longitude": ",".join(
-                    str(cell["longitude"]) for cell in cells
-                ),
-            },
-        )
-
-        elevation_response.raise_for_status()
-
-        elevations = elevation_response.json().get(
-            "elevation",
-            [],
-        )
-        
-        if not elevation_response:
-            print("No Elevation Dawg")
-        
-        if len(elevations) != len(cells):
+    # 1. Use elevation already saved in the GeoJSON.
+    for cell in cells:
+        if cell.get("elevation_m") is None:
             raise ValueError(
-                "Elevation data does not match the grid cells."
+                f"Missing saved elevation for grid "
+                f"{cell.get('grid_id', cell.get('cell_id', 'unknown'))}."
             )
 
-        # ---------- 2. Retrieve current weather near the first cell.
+    async with httpx.AsyncClient(timeout=30) as client:
 
+        # 2. Retrieve current weather near the first cell.
         weather_response = await client.get(
             WEATHER_URL,
             params={
@@ -102,9 +80,6 @@ async def get_environmental_factors(
                 "timezone": "auto",
             },
         )
-        
-        if not weather_response:
-            print("NAHH Weather")
 
         weather_response.raise_for_status()
 
@@ -115,15 +90,13 @@ async def get_environmental_factors(
                 "Current weather data is unavailable."
             )
 
-        # ----------- 3. Retrieve nearby mapped lakes and reservoirs.
-
+        # 3. Retrieve nearby mapped lakes and reservoirs.
         lake_features = []
         lake_data_status = "available"
 
         lake_queries = []
 
         for cell in cells:
-
             latitude = cell["latitude"]
             longitude = cell["longitude"]
 
@@ -146,7 +119,6 @@ async def get_environmental_factors(
         )
 
         try:
-
             lake_response = await client.post(
                 OVERPASS_URL,
                 data={"data": query},
@@ -160,35 +132,21 @@ async def get_environmental_factors(
                 "elements",
                 [],
             )
-            
-            if not lake_response:
-                print("NAHH lake")
 
-        except (
-            httpx.HTTPError,
-            ValueError,
-        ) as error:
-
+        except (httpx.HTTPError, ValueError) as error:
             # Lake data is optional.
-            # Do not fail elevation and weather because
-            # the Overpass API is unavailable.
-
             lake_features = []
-
             lake_data_status = (
                 f"unavailable: {type(error).__name__}"
             )
 
-        # ------------- 4. Attach environmental information to each cell.
-
+        # 4. Attach environmental information to each cell.
         enriched_cells = []
 
-        for index, cell in enumerate(cells):
-
+        for cell in cells:
             lake_distances = []
 
             for feature in lake_features:
-
                 center = feature.get("center", feature)
 
                 lake_latitude = center.get("lat")
@@ -217,16 +175,10 @@ async def get_environmental_factors(
 
             enriched_cells.append({
                 **cell,
-
-                "elevation_m": elevations[index],
-
+                "elevation_m": cell["elevation_m"],
                 "weather": weather,
-
-                "nearest_mapped_lake_km": (
-                    nearest_lake_km
-                ),
-
+                "nearest_mapped_lake_km": nearest_lake_km,
                 "lake_data_status": lake_data_status,
             })
-    
+
     return enriched_cells
