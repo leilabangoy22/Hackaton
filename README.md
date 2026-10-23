@@ -1,3 +1,8 @@
+<h1 align="center">
+	<img width="500" src="Backend/LOGO_LalayAndFriends.png" alt="KCORD">
+	<br>
+</h1>
+
 # Hackaton
 
 A multi-tier software project containing a Flutter application frontend, Backend API service, and utility Scripts [31].
