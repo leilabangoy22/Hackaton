@@ -1,4 +1,5 @@
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import Point
 from pathlib import Path
 
@@ -12,6 +13,7 @@ PROJECTED_CRS = "EPSG:32651"
 
 
 def find_cell(latitude: float, longitude: float) -> dict | None:
+    """Find the grid cell containing the user's location."""
 
     grid = gpd.read_file(GRID_FILE).to_crs(PROJECTED_CRS)
 
@@ -36,9 +38,8 @@ def find_cell(latitude: float, longitude: float) -> dict | None:
         "row": int(row),
     }
 
-def get_nearby_cells(current_cell: dict) -> list[dict]:
-    """Return the current grid cell and its surrounding eight neighbors."""
 
+def get_nearby_cells(current_cell: dict) -> list[dict]:
     grid = gpd.read_file(GRID_FILE)
 
     cell_ids = grid["cell_id"].astype(str).str.split("-", expand=True)
@@ -54,28 +55,30 @@ def get_nearby_cells(current_cell: dict) -> list[dict]:
         & grid["row"].between(row - 1, row + 1)
     ]
 
-    return [
-        {
+    nearby_cells = []
+
+    for _, cell in nearby_grid.iterrows():
+        elevation = cell.get("elevation_m")
+
+        nearby_cells.append({
             "grid_id": str(cell["cell_id"]),
-            "latitude": cell.geometry.centroid.y
-                if grid.crs == "EPSG:4326"
-                else gpd.GeoSeries(
-                    [cell.geometry],
-                    crs=grid.crs
-                ).to_crs("EPSG:4326").iloc[0].centroid.y,
-            "longitude": cell.geometry.centroid.x
-                if grid.crs == "EPSG:4326"
-                else gpd.GeoSeries(
-                    [cell.geometry],
-                    crs=grid.crs
-                ).to_crs("EPSG:4326").iloc[0].centroid.x,
+            "latitude": float(cell["latitude"]),
+            "longitude": float(cell["longitude"]),
             "column": int(cell["column"]),
             "row": int(cell["row"]),
-        }
-        for _, cell in nearby_grid.iterrows()
-    ]
+            "elevation_m": (
+                float(elevation)
+                if pd.notna(elevation)
+                else None
+            ),
+        })
+
+    return nearby_cells
+
 
 def assess_cells(cells: list[dict]) -> list[dict]:
+    """Return cells with valid risk scores."""
+
     assessed_cells = []
 
     for cell in cells:
@@ -91,7 +94,7 @@ def assess_cells(cells: list[dict]) -> list[dict]:
             "grid_id": cell["grid_id"],
             "latitude": cell["latitude"],
             "longitude": cell["longitude"],
-            "risk_score": None
+            "risk_score": risk_score,
         })
 
     return assessed_cells

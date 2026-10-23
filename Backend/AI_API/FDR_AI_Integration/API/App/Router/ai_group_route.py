@@ -6,16 +6,21 @@ import logging
 from fastapi import APIRouter, HTTPException, Query
 from google import genai
 
-# import config
-from ..settings import Settings # -- Remote
 
-from ..DTO import ai_params_dto, risk_response_dto
-from ..Helper import cell_helper, environmental_helper
+# from ..settings import Settings # -- Remote
+# from ..DTO import ai_params_dto, risk_response_dto
+# from ..Helper import cell_helper, environmental_helper
+
+from config import Setting # -- Remote
+from DTO import ai_params_dto, risk_response_dto
+from Helper import cell_helper, environmental_helper
 
 
 logger = logging.getLogger(__name__)
 
-setting = Settings()
+# setting = Settings()
+setting = Setting()
+
 client = genai.Client(api_key=setting.gemini_key)
 
 ai = APIRouter(

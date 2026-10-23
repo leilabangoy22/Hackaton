@@ -13,7 +13,7 @@ OVERPASS_HEADERS = {
     "Accept": "application/json",
 }
 
-
+    
 def calculate_distance_km(
     latitude1: float,
     longitude1: float,
