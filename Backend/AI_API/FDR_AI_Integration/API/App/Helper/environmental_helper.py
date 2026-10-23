@@ -1,8 +1,5 @@
-
 import math
-
 import httpx
-
 
 WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
@@ -19,7 +16,6 @@ def calculate_distance_km(
     latitude2: float,
     longitude2: float,
 ) -> float:
-    """Calculate the approximate distance between two coordinates."""
 
     earth_radius_km = 6371.0
 
@@ -29,12 +25,7 @@ def calculate_distance_km(
     delta_latitude = latitude2 - latitude1
     delta_longitude = math.radians(longitude2 - longitude1)
 
-    a = (
-        math.sin(delta_latitude / 2) ** 2
-        + math.cos(latitude1)
-        * math.cos(latitude2)
-        * math.sin(delta_longitude / 2) ** 2
-    )
+    a = (math.sin(delta_latitude / 2) ** 2 + math.cos(latitude1) * math.cos(latitude2) * math.sin(delta_longitude / 2) ** 2 )
 
     # Prevent floating-point rounding from making a invalid.
     a = max(0.0, min(1.0, a))
@@ -43,17 +34,15 @@ def calculate_distance_km(
         math.sqrt(a),
         math.sqrt(1 - a),
     )
-
+    
 
 async def get_environmental_factors(
     cells: list[dict],
 ) -> list[dict]:
-    """Add saved elevation, current weather, and mapped lake information."""
 
     if not cells:
         return []
 
-    # 1. Use elevation already saved in the GeoJSON.
     for cell in cells:
         if cell.get("elevation_m") is None:
             raise ValueError(
@@ -63,7 +52,6 @@ async def get_environmental_factors(
 
     async with httpx.AsyncClient(timeout=30) as client:
 
-        # 2. Retrieve current weather near the first cell.
         weather_response = await client.get(
             WEATHER_URL,
             params={
@@ -90,7 +78,6 @@ async def get_environmental_factors(
                 "Current weather data is unavailable."
             )
 
-        # 3. Retrieve nearby mapped lakes and reservoirs.
         lake_features = []
         lake_data_status = "available"
 
@@ -140,7 +127,6 @@ async def get_environmental_factors(
                 f"unavailable: {type(error).__name__}"
             )
 
-        # 4. Attach environmental information to each cell.
         enriched_cells = []
 
         for cell in cells:

@@ -10,7 +10,7 @@ from google import genai
 from ..settings import Settings # -- Remote
 from ..DTO import ai_params_dto, risk_response_dto
 from ..Helper import cell_helper, environmental_helper
-from ..settings import Settings # -- Remote
+from ..settings import Setting # -- Remote
 
 # from config import Setting # -- Remote
 # from DTO import ai_params_dto, risk_response_dto
@@ -19,7 +19,7 @@ from ..settings import Settings # -- Remote
 
 logger = logging.getLogger(__name__)
 
-setting = Settings()
+setting = Setting()
 
 client = genai.Client(api_key=setting.gemini_key)
 
@@ -149,11 +149,11 @@ ENVIRONMENTAL DATA:
 {json.dumps(environmental_cells, indent=2)}
 """
 
-    # 5. Ask Gemini to generate the risk assessments.
+    # 5. Ask Gemini to generate the risk assessments
     try:
         response = await asyncio.to_thread(
             client.models.generate_content,
-            model="gemini-3.5-flash",
+            model="gemini-3.5-flash-lite",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",
